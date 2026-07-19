@@ -51,6 +51,22 @@ async function createServer() {
     return false;
   }
 
+  // API Route: get all listings for synchronization
+  app.get('/api/listings', async (req, res) => {
+    try {
+      const q = collection(db, 'listings');
+      const snap = await getDocs(q);
+      const listings: any[] = [];
+      snap.forEach((docSnap) => {
+        listings.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      res.json(listings);
+    } catch (error: any) {
+      console.error('Error fetching listings via API:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch listings' });
+    }
+  });
+
   // API Route: create a new game listing
   app.post('/api/listings', async (req, res) => {
     try {
