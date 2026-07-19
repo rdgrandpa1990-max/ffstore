@@ -692,7 +692,9 @@ export default function App() {
                   title: selectedAccount.title,
                   level: selectedAccount.level,
                   rank: selectedAccount.rank,
-                  buyerEmail: currentUserEmail
+                  buyerEmail: currentUserEmail,
+                  assignedMailbox: selectedAccount.sellerEmail || selectedAccount.credentials?.email || '',
+                  mailboxType: (selectedAccount.sellerEmail || '').toLowerCase().includes('gmail.com') ? 'gmail' : ((selectedAccount.sellerEmail || '').toLowerCase().includes('zoho') ? 'zoho' : 'imap')
                 })
               });
               if (response.ok) {
