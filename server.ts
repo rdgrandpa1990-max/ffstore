@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import { db } from './src/firebase';
-import { collection, addDoc, getDocs, query, where, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 dotenv.config();
 
@@ -103,6 +103,36 @@ async function createServer() {
     } catch (error: any) {
       console.error('Error deleting listing via API:', error);
       res.status(500).json({ error: error.message || 'Failed to delete listing' });
+    }
+  });
+
+  // API Route: restock a game listing by its linked local admin ID
+  app.post('/api/listings/by-admin-id/:id/restock', async (req, res) => {
+    try {
+      const apiKey = req.headers['x-api-key'];
+      const isAuthorized = await verifyApiKey(apiKey);
+      
+      if (!isAuthorized) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
+      }
+
+      const adminDocId = req.params.id;
+      const q = query(collection(db, 'listings'), where('linkedAdminDocId', '==', adminDocId));
+      const snap = await getDocs(q);
+      
+      let restockedCount = 0;
+      for (const docSnap of snap.docs) {
+        await updateDoc(doc(db, 'listings', docSnap.id), {
+          status: 'available',
+          buyerEmail: '' // Clear buyer email to make it in-stock again
+        });
+        restockedCount++;
+      }
+
+      res.json({ success: true, restockedCount });
+    } catch (error: any) {
+      console.error('Error restocking listing via API:', error);
+      res.status(500).json({ error: error.message || 'Failed to restock listing' });
     }
   });
 
