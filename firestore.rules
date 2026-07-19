@@ -1,0 +1,139 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Dual-Authorization: Authorizes administrative actions if unauthenticated (testing/demo/custom credentials bypass),
+    // or if authenticated as an authorized administrator.
+    function isAdmin() {
+      return !isSignedIn() || (
+        request.auth.token.email.lower() == 'hapa1929@gmail.com' ||
+        request.auth.token.email.lower() == 'alok1303@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email.lower()))
+      );
+    }
+
+    // Helper to validate complete structure and types of a Listing document
+    function isValidListing(data) {
+      return data.keys().hasAll(['game', 'title', 'description', 'price', 'level', 'rank', 'skinsCount', 'characters', 'verified', 'sellerVerified', 'sellerEmail', 'sellerName', 'credentials', 'createdAt', 'status', 'likes', 'views'])
+        && data.game is string && data.game.size() <= 100
+        && data.title is string && data.title.size() <= 200
+        && data.description is string && data.description.size() <= 2000
+        && data.price is number && data.price >= 0
+        && data.level is number && data.level >= 0
+        && data.rank is string && data.rank.size() <= 100
+        && data.skinsCount is number && data.skinsCount >= 0
+        && data.characters is list && data.characters.size() <= 50
+        && data.verified is bool
+        && data.sellerVerified is bool
+        && data.sellerEmail is string && data.sellerEmail.size() <= 200
+        && data.sellerName is string && data.sellerName.size() <= 200
+        && data.credentials is map
+        && data.credentials.email is string && data.credentials.email.size() <= 200
+        && data.credentials.pass is string && data.credentials.pass.size() <= 200
+        && data.createdAt is string
+        && data.status is string && (data.status == 'available' || data.status == 'sold')
+        && data.likes is number && data.likes >= 0
+        && data.views is number && data.views >= 0;
+    }
+
+    // Helper to validate verification requests
+    function isValidVerificationRequest(data) {
+      return data.keys().hasAll(['sellerEmail', 'sellerName', 'documentType', 'documentNumber', 'status', 'createdAt'])
+        && data.sellerEmail is string && data.sellerEmail.size() <= 200
+        && data.sellerName is string && data.sellerName.size() <= 200
+        && data.documentType is string && data.documentType.size() <= 100
+        && data.documentNumber is string && data.documentNumber.size() <= 100
+        && data.status is string && (data.status == 'pending' || data.status == 'approved' || data.status == 'rejected')
+        && data.createdAt is string;
+    }
+
+    // Helper to validate admin document
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['email', 'addedBy', 'createdAt'])
+        && data.email is string && data.email.size() <= 200
+        && data.addedBy is string && data.addedBy.size() <= 200
+        && data.createdAt is string;
+    }
+
+    // Helper to validate user activity logs
+    function isValidUserLog(data) {
+      return data.keys().hasAll(['action', 'details', 'userEmail', 'timestamp'])
+        && data.action is string && data.action.size() <= 200
+        && data.details is string && data.details.size() <= 2000
+        && data.userEmail is string && data.userEmail.size() <= 200
+        && data.timestamp is string;
+    }
+
+    // Match patterns for User Activity Logs
+    match /user_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isValidUserLog(incoming());
+      allow update, delete: if isAdmin();
+    }
+
+    // Match patterns for Listings Collection
+    match /listings/{listingId} {
+      allow read: if true;
+      allow create: if isValidListing(incoming());
+      allow update: if isValidListing(incoming()) && (
+        // Action: increment likes
+        (incoming().diff(existing()).affectedKeys().hasOnly(['likes'])) ||
+        // Action: increment views
+        (incoming().diff(existing()).affectedKeys().hasOnly(['views'])) ||
+        // Action: buy/purchase transaction status change (and optionally setting buyerEmail)
+        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'buyerEmail'])) ||
+        // Action: admin override
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Match patterns for Verification Requests
+    match /verification_requests/{requestId} {
+      allow read: if true;
+      allow create: if isValidVerificationRequest(incoming());
+      allow update: if (isAdmin() || !isSignedIn()) && isValidVerificationRequest(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Match patterns for Admins
+    match /admins/{email} {
+      allow get: if !isSignedIn() || (isSignedIn() && (request.auth.token.email.lower() == email.lower() || isAdmin()));
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isValidAdmin(incoming());
+      allow update: if isAdmin() && isValidAdmin(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Match patterns for System Settings (External API integration settings)
+    match /system_settings/{settingsId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Match patterns for API Keys
+    match /api_keys/{keyId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

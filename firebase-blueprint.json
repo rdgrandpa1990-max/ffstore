@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "Listing": {
+      "title": "Listing",
+      "description": "Game account listings for sale",
+      "type": "object",
+      "properties": {
+        "game": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "level": { "type": "number" },
+        "rank": { "type": "string" },
+        "skinsCount": { "type": "number" },
+        "characters": { "type": "array" },
+        "verified": { "type": "boolean" },
+        "sellerVerified": { "type": "boolean" },
+        "sellerEmail": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "credentials": { "type": "object" },
+        "createdAt": { "type": "string" },
+        "status": { "type": "string" },
+        "buyerEmail": { "type": "string" },
+        "likes": { "type": "number" },
+        "views": { "type": "number" }
+      },
+      "required": ["game", "title", "description", "price", "level", "rank", "skinsCount", "characters", "verified", "sellerVerified", "sellerEmail", "sellerName", "credentials", "createdAt", "status", "likes", "views"]
+    },
+    "VerificationRequest": {
+      "title": "VerificationRequest",
+      "description": "Seller verification request details",
+      "type": "object",
+      "properties": {
+        "sellerEmail": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "documentType": { "type": "string" },
+        "documentNumber": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "selfieUrl": { "type": "string" }
+      },
+      "required": ["sellerEmail", "sellerName", "documentType", "documentNumber", "status", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Administrator profiles",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "addedBy": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email", "addedBy", "createdAt"]
+    }
+  },
+  "firestore": {
+    "listings/{listingId}": {
+      "schema": "Listing",
+      "description": "Collection of listings"
+    },
+    "verification_requests/{requestId}": {
+      "schema": "VerificationRequest",
+      "description": "Collection of verification requests"
+    },
+    "admins/{email}": {
+      "schema": "Admin",
+      "description": "Admin collection to store administrator emails"
+    }
+  }
+}

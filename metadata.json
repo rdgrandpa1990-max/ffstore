@@ -1,0 +1,6 @@
+{
+  "name": "Game Account and ID Marketplace",
+  "description": "A secure marketplace to buy, sell, and verify game IDs and accounts with secure simulated checkout verification and user authentication.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-game: "Rajdhani", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Overriding standard slate colors to create a deep dark, glowing immersive theme */
+  --color-slate-950: #040508;
+  --color-slate-900: #080c16;
+  --color-slate-850: #0d1222;
+  --color-slate-800: rgba(6, 182, 212, 0.15); /* Custom glowing cyan border overrides! */
+  --color-slate-750: rgba(6, 182, 212, 0.22);
+  --color-slate-700: rgba(6, 182, 212, 0.3);
+  --color-slate-600: #64748b;
+  --color-slate-500: #94a3b8;
+
+  /* Mapping violet & indigo accents directly to cyber cyan & high-tech blues */
+  --color-violet-950: rgba(6, 182, 212, 0.08);
+  --color-violet-900: rgba(6, 182, 212, 0.12);
+  --color-violet-600: #06b6d4;
+  --color-violet-500: #0ea5e9;
+  --color-violet-400: #22d3ee;
+  --color-violet-300: #67e8f9;
+
+  --color-indigo-950: #060a16;
+  --color-indigo-600: #2563eb;
+  --color-indigo-500: #3b82f6;
+  --color-indigo-400: #60a5fa;
+}
+
+@layer base {
+  body {
+    background-color: #040508;
+    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, rgba(6, 182, 212, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(6, 182, 212, 0.02) 1px, transparent 1px);
+    position: relative;
+    font-family: "Inter", sans-serif;
+    color: #f1f5f9;
+  }
+  
+  /* Add ambient cyan-blue cybernetic glow points to the canvas */
+  body::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 15%;
+    width: 300px;
+    height: 300px;
+    background: rgba(6, 182, 212, 0.04);
+    filter: blur(100px);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  body::after {
+    content: '';
+    position: absolute;
+    bottom: 20%;
+    right: 15%;
+    width: 400px;
+    height: 400px;
+    background: rgba(99, 102, 241, 0.03);
+    filter: blur(120px);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  h1, h2, h3, h4, h5, h6, [id="logo"], button {
+    font-family: "Space Grotesk", sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Make tags, badges, and filters feel like high-tech game interface items */
+  span.uppercase, [id^="game-filter-"], [id^="tier-filter-"], .font-black {
+    font-family: "Rajdhani", sans-serif;
+    letter-spacing: 0.04em;
+  }
+}
+
+@layer utilities {
+  /* Custom utility classes */
+  .cyber-glow-cyan {
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+  }
+  
+  .cyber-glow-cyan-hover:hover {
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.25);
+    border-color: rgba(6, 182, 212, 0.45) !important;
+  }
+
+  .cyber-glass {
+    background: rgba(8, 12, 22, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(6, 182, 212, 0.15);
+  }
+
+  /* Custom high-tech scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #020304;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(6, 182, 212, 0.2);
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.4);
+  }
+}
